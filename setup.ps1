@@ -35,9 +35,24 @@ $agentsDir = "$env:USERPROFILE\.codex"; New-Item -ItemType Directory -Force -Pat
 $agentsPath = "$agentsDir\AGENTS.md"
 $templatePath = Join-Path $scriptDir "config\AGENTS.md.template"
 if (Test-Path $templatePath) {
-  $content = (Get-Content $templatePath -Raw).Replace("{{BASH_PATH}}", $bashPath)
-  if (Test-Path $agentsPath) { $existing = Get-Content $agentsPath -Raw; if ($existing -match "Shell Rules") { $content = $existing -replace "(?s)# Shell Rules.*", $content; Set-Content -Path $agentsPath -Value $content -Encoding UTF8; Write-Host "  AGENTS.md updated" } else { Add-Content -Path $agentsPath -Value $content -Encoding UTF8; Write-Host "  AGENTS.md appended" } }
-  else { Set-Content -Path $agentsPath -Value $content -Encoding UTF8; Write-Host "  AGENTS.md created" }
+  $utf8 = New-Object System.Text.UTF8Encoding($false)
+  $content = [System.IO.File]::ReadAllText($templatePath, [System.Text.Encoding]::UTF8).Replace("{{BASH_PATH}}", $bashPath)
+  if (Test-Path $agentsPath) {
+    $existing = [System.IO.File]::ReadAllText($agentsPath, [System.Text.Encoding]::UTF8)
+    $marker = "# Shell Rules"
+    $idx = $existing.IndexOf($marker, [System.StringComparison]::Ordinal)
+    if ($idx -ge 0) {
+      $newContent = $existing.Substring(0, $idx).TrimEnd() + "`r`n`r`n" + $content.TrimEnd() + "`r`n"
+      [System.IO.File]::WriteAllText($agentsPath, $newContent, $utf8)
+      Write-Host "  AGENTS.md updated"
+    } else {
+      [System.IO.File]::WriteAllText($agentsPath, $existing.TrimEnd() + "`r`n`r`n" + $content.TrimEnd() + "`r`n", $utf8)
+      Write-Host "  AGENTS.md appended"
+    }
+  } else {
+    [System.IO.File]::WriteAllText($agentsPath, $content.TrimEnd() + "`r`n", $utf8)
+    Write-Host "  AGENTS.md created"
+  }
 }
 Write-Host "[5/6] Configuring Git..."
 git config --global core.autocrlf false 2>$null
@@ -51,7 +66,7 @@ if ($ProxyUrl -ne "none") { git config --global http.proxy $ProxyUrl 2>$null; gi
 Write-Host "  Git configured"
 Write-Host "[6/6] System optimizations..."
 if (-not $SkipDefender) { $adminScript = Join-Path $scriptDir "config\optimize-admin.ps1"; if (Test-Path $adminScript) { try { Start-Process powershell -Verb RunAs -ArgumentList "-ExecutionPolicy","Bypass","-File",$adminScript -Wait -ErrorAction Stop; Write-Host "  Applied" } catch { Write-Host "  Skipped (need admin)" -ForegroundColor Yellow } } }
-$bashWorks = $false; try { $bashWorks = (& $bashPath -c "grep --version" 2>$null) -ne $null } catch {}
+$bashWorks = $false; try { $bashWorks = (& $bashPath -lc "grep --version" 2>$null) -ne $null } catch {}
 $agentsExists = Test-Path $agentsPath
 Write-Host ""; Write-Host "=== Result ==="
 if ($bashWorks) { Write-Host "  Bash: OK ($bashSource)" -ForegroundColor Green } else { Write-Host "  Bash: FAIL" -ForegroundColor Red }
