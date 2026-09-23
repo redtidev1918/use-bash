@@ -33,6 +33,21 @@ Write-Host "Developer mode enabled"
 powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null
 Write-Host "Power plan: High Performance"
 
+
+# Machine PATH: put bash dir first so `bash` resolves to the real bash
+# (e.g. MSYS2) instead of C:\Windows\System32\bash.exe (WSL), which
+# precedes all user-PATH entries and hangs when its stdio is piped.
+if ($BashDir) {
+    $bashDirN = $BashDir.TrimEnd('\')
+    $mp = [Environment]::GetEnvironmentVariable('Path', 'Machine')
+    $parts = $mp -split ';' | ForEach-Object { $_.TrimEnd('\') }
+    if ($parts -notcontains $bashDirN) {
+        [Environment]::SetEnvironmentVariable('Path', ($bashDirN + ';' + $mp), 'Machine')
+        Write-Host "Machine PATH patched: bash dir moved before System32"
+    } else {
+        Write-Host "Machine PATH order OK"
+    }
+}
 Write-Host "All system optimizations applied."
 
 

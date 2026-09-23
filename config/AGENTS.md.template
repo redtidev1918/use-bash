@@ -11,8 +11,9 @@ When you reach for `Select-String`, `Get-ChildItem -Filter`, or any PowerShell p
 
 Your bash binary: `{{BASH_PATH}}`
 
-If `shell: "bash"` hangs or resolves to WSL, use the full path above instead. When calling bash from PowerShell, prepend PATH setup:
-`& "{{BASH_PATH}}" -c "export PATH=/usr/bin:/bin; your command"`
+If `shell: "bash"` hangs, it resolved to `C:\Windows\System32\bash.exe` (WSL), which hangs when its stdio is piped. Retry with the full path above.
+Prefer a login shell so /usr/bin is on PATH: `& "{{BASH_PATH}}" -lc "your command"`
+(or prepend `export PATH=/usr/bin:/bin;` for non-login shells).
 
 ## How to use bash
 
