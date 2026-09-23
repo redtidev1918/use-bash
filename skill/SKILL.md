@@ -2,79 +2,126 @@
 name: winix
 description: >
   Set up a Unix-like development shell on Windows for AI coding agents.
-  Installs Scoop, dev tools, Starship prompt, MSYS2 bash, configures proxy
-  and mirrors, and generates AGENTS.md. Use when a Windows user wants a
-  better terminal, Unix commands, or complains about PowerShell/encoding.
-version: 1.0.0
+  Installs Scoop, MSYS2 bash, Starship prompt, dev tools, and writes AGENTS.md
+  so the agent uses grep/sed/awk naturally in future sessions. Use when a
+  Windows user wants a better terminal, Unix commands, or has encoding issues.
 ---
 
-# winix
+# winix — Agent Setup Instructions
 
-Turns a Windows terminal into a Unix-capable development environment.
+You are setting up a Unix-like shell environment on a Windows machine. Follow these steps in order. Do not skip verification steps.
 
-## When to use
+## Step 1: Detect environment
 
-- User wants a "better terminal" or "Unix-like shell" on Windows
-- User complains about PowerShell encoding (GBK, emoji, garbled Chinese)
-- User is setting up a new Windows dev machine
-- User wants Codex/Claude to use `grep`/`sed`/`awk` naturally
-
-## Setup
-
-Run from this skill's directory:
+Check the following and remember the results:
 
 ```powershell
-.\setup.ps1                                    # Default (proxy 127.0.0.1:7897)
-.\setup.ps1 -ProxyUrl "http://127.0.0.1:1080"  # Custom proxy
-.\setup.ps1 -ProxyUrl "none"                   # No proxy
-.\setup.ps1 -SkipFont -SkipMsys2              # Minimal
+# PowerShell 7 present?
+Get-Command pwsh -ErrorAction SilentlyContinue
+
+# Scoop present?
+Get-Command scoop -ErrorAction SilentlyContinue
+
+# Proxy running? Test common ports
+$ports = @(7897, 7890, 1080, 10808)
+foreach ($port in $ports) {
+    try {
+        $test = Invoke-WebRequest -Uri 'https://www.google.com' -Proxy "http://127.0.0.1:$port" -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop
+        Write-Host "Proxy found on port $port"
+        break
+    } catch { }
+}
+
+# Already installed? (check for starship)
+Get-Command starship -ErrorAction SilentlyContinue
 ```
 
-## What gets installed
+Determine:
+- If pwsh is missing → install PowerShell 7 first (`winget install Microsoft.PowerShell`)
+- If proxy found → use that port in setup
+- If no proxy → run with `-ProxyUrl "none"`
+- If starship already exists → user may have winix already, ask before overwriting
 
-| Category | Tools |
-|----------|-------|
-| Package Manager | Scoop |
-| Dev Tools | git, nodejs, python, jq, 7zip |
-| UX | starship, zoxide, eza, ripgrep, fd, fzf, bat |
-| Unix Bridge | msys2 (bash, grep, sed, awk, find, make, patch, diff, tar, vim) |
-| Font | JetBrainsMono Nerd Font |
+## Step 2: Clone and run setup
 
-## What gets configured
+If the repo is not already present locally:
 
-1. PowerShell 7 profile (UTF-8, PSReadLine, eza aliases, proxy, Unix bridge)
-2. Windows Terminal font
-3. Starship prompt config
-4. MSYS2 .bashrc (proxy, aliases, encoding)
-5. npm mirror -> registry.npmmirror.com
-6. pip mirror -> mirrors.aliyun.com
-7. Git proxy + longpaths + autocrlf
-8. ~/.codex/AGENTS.md (shell selection guide)
+```powershell
+git clone https://github.com/redtidev1918/winix.git "$env:USERPROFILE\.winix"
+cd "$env:USERPROFILE\.winix"
+```
 
-## After setup
+Run setup with the detected proxy:
 
-Tell the user to restart their terminal. Commands they get:
-- `ls/ll/lt` -> eza with icons
-- `z <keyword>` -> smart directory jump (zoxide)
-- `proxy-on/off` -> toggle proxy
-- `bash` -> enter MSYS2 bash
-- `which <cmd>` -> find command path
+```powershell
+# If proxy was detected on port 7897:
+.\setup.ps1
 
-## Shell guide for agents
+# If proxy on other port:
+.\setup.ps1 -ProxyUrl "http://127.0.0.1:PORT"
 
-| Task | Shell |
-|------|-------|
-| Windows paths, .NET objects | PowerShell 7 |
-| Unix pipelines | MSYS2 bash |
-| Full Linux (apt, gcc) | WSL |
+# If no proxy:
+.\setup.ps1 -ProxyUrl "none"
+```
 
-In exec_command, pass `shell: "bash"` for MSYS2 bash.
-In PowerShell, `bash -c "cmd"` calls MSYS2 bash.
-WSL: `wsl -d Ubuntu-24.04 -- cmd`
+If user is not in China or doesn't want mirrors:
 
-## Troubleshooting
+```powershell
+.\setup.ps1 -SkipMirrors
+```
 
-- **Starship "dumb terminal"**: Normal in pipes/CI. Only affects visual prompt.
-- **UTF-8 garbled**: Profile sets UTF-8. If still broken, enable Windows "Beta: Use Unicode UTF-8" in region settings.
-- **pacman 404**: Run `pacman -S` without `-y` to skip sync, or set proxy.
-- **Scoop not found**: Refresh PATH with `[Environment]::GetEnvironmentVariable('Path','User')`.
+## Step 3: Handle errors
+
+| Error | Fix |
+|-------|-----|
+| `scoop: command not found` | Refresh PATH: `$env:Path = [Environment]::GetEnvironmentVariable('Path','User') + ';' + [Environment]::GetEnvironmentVariable('Path','Machine')` |
+| `scoop install` fails silently | Run `scoop install TOOLNAME` individually to see the error |
+| MSYS2 pacman 404 | Run `pacman -S` without `-y` to skip database sync, or set proxy in bash |
+| Font not appearing | Font may need a restart of Windows Terminal. Verify: `(New-Object System.Drawing.Text.InstalledFontCollection).Families \| Where-Object { $_.Name -match 'JetBrainsMono Nerd' }` |
+| Setup script execution blocked | `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force` |
+
+## Step 4: Verify
+
+After setup completes, verify:
+
+```powershell
+# These should all resolve
+Get-Command git, node, python, starship, zoxide, eza, rg, fd, jq, bat, 7z
+
+# MSYS2 bash should work
+& "$env:USERPROFILE\scoop\apps\msys2\current\usr\bin\bash.exe" --login -c "grep --version | head -1; make --version | head -1; echo proxy=$http_proxy"
+
+# AGENTS.md should exist
+Test-Path "$env:USERPROFILE\.codex\AGENTS.md"
+```
+
+If any check fails, troubleshoot before telling the user it's done.
+
+## Step 5: Tell the user
+
+Say exactly this:
+
+```
+Setup complete. Restart your terminal (close and reopen).
+
+You now have:
+- Starship prompt with git/language info
+- eza (ls with icons) — try `ll`
+- zoxide (smart cd) — try `z <keyword>`
+- MSYS2 bash — try `bash` then `grep --version`
+- Proxy configured${if proxy}
+
+From now on, I (your AI agent) will automatically use bash for Unix tasks
+like grep/sed/awk, and PowerShell for Windows tasks. You don't need to
+configure anything.
+```
+
+## Step 6: Future sessions
+
+The AGENTS.md file (generated by setup) ensures every new session uses Unix tools correctly:
+
+- For `grep`, `sed`, `awk`, `find`, `make`, `tar`, `diff`, `patch` → pass `shell: "bash"` in exec_command
+- For Windows paths, .NET objects, registry, services → use default PowerShell 7
+- For apt, full Linux → use `wsl -d Ubuntu-24.04 -- cmd`
+
+Never use PowerShell aliases (`Select-String`, `Get-ChildItem -Filter`) when bash equivalents (`grep`, `find`) are available.

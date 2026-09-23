@@ -17,6 +17,25 @@ param(
     [switch]$SkipAgents
 )
 $ErrorActionPreference = "Stop"
+
+# Auto-detect proxy if using default
+if ($ProxyUrl -eq "http://127.0.0.1:7897") {
+    $detected = $null
+    foreach ($port in @(7897, 7890, 1080, 10808)) {
+        try {
+            $null = Invoke-WebRequest -Uri 'https://www.google.com' -Proxy "http://127.0.0.1:$port" -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop
+            $detected = "http://127.0.0.1:$port"
+            break
+        } catch { }
+    }
+    if ($detected) {
+        Write-Host "Proxy auto-detected: $detected" -ForegroundColor Cyan
+        $ProxyUrl = $detected
+    } else {
+        Write-Host "No proxy detected, using direct connection" -ForegroundColor Yellow
+        $ProxyUrl = "none"
+    }
+}
 $script:Step = 0
 $script:Total = 8
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
@@ -158,4 +177,5 @@ if (Test-Path $msysBin) {
 
 Write-Host "`n=== Setup complete! Restart terminal. ===" -ForegroundColor Green
 Write-Host "  ls/ll/lt=eza | z=jump | proxy-on/off | bash=MSYS2" -ForegroundColor Cyan
+
 
