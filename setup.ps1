@@ -65,7 +65,7 @@ git config --global gc.auto 0 2>$null
 if ($ProxyUrl -ne "none") { git config --global http.proxy $ProxyUrl 2>$null; git config --global https.proxy $ProxyUrl 2>$null }
 Write-Host "  Git configured"
 Write-Host "[6/6] System optimizations..."
-if (-not $SkipDefender) { $adminScript = Join-Path $scriptDir "config\optimize-admin.ps1"; if (Test-Path $adminScript) { try { Start-Process powershell -Verb RunAs -ArgumentList "-ExecutionPolicy","Bypass","-File",$adminScript -Wait -ErrorAction Stop; Write-Host "  Applied" } catch { Write-Host "  Skipped (need admin)" -ForegroundColor Yellow } } }
+if (-not $SkipDefender) { $adminScript = Join-Path $scriptDir "config\optimize-admin.ps1"; if (Test-Path $adminScript) { try { Start-Process powershell -Verb RunAs -ArgumentList "-ExecutionPolicy","Bypass","-File",$adminScript,"-BashDir",$bashDir -Wait -ErrorAction Stop; Write-Host "  Applied" } catch { Write-Host "  Skipped (need admin)" -ForegroundColor Yellow } } }
 $bashWorks = $false; try { $bashWorks = (& $bashPath -lc "grep --version" 2>$null) -ne $null } catch {}
 $agentsExists = Test-Path $agentsPath
 Write-Host ""; Write-Host "=== Result ==="
