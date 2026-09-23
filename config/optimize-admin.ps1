@@ -1,4 +1,4 @@
-# unix-on-windows-admin.ps1 - System-level optimizations (requires admin)
+# win-to-unix-admin.ps1 - System-level optimizations (requires admin)
 # Called by setup.ps1
 
 # Defender exclusions for dev directories
@@ -34,5 +34,6 @@ powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null
 Write-Host "Power plan: High Performance"
 
 Write-Host "All system optimizations applied."
+
 
 

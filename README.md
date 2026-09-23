@@ -1,4 +1,4 @@
-# unix-on-windows
+# win-to-unix
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -9,14 +9,14 @@ Windows terminal that runs Unix tools natively. One script, no WSL, no VM.
 Paste this into Codex, Claude Code, Cursor, or your coding agent:
 
 ```
-Install the /unix-on-windows skill from https://github.com/redtidev1918/unix-on-windows and run the setup
+Install the /win-to-unix skill from https://github.com/redtidev1918/win-to-unix and run the setup
 ```
 
 Or run it yourself:
 
 ```powershell
-git clone https://github.com/redtidev1918/unix-on-windows.git
-cd unix-on-windows
+git clone https://github.com/redtidev1918/win-to-unix.git
+cd win-to-unix
 .\setup.ps1
 ```
 
@@ -47,5 +47,6 @@ Your AI agent automatically uses bash for Unix tasks and PowerShell for Windows 
 ## License
 
 MIT
+
 
 
