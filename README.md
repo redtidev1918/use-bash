@@ -4,7 +4,7 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078D4.svg?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 [![For](https://img.shields.io/badge/For-Codex%20%2B%20AI%20Agents-8A2BE2.svg)](https://github.com/openai/codex)
 
-修复 18 种让 AI 编程助手在 Windows 上卡在 PowerShell 的反模式。
+告诉 AI 编程助手在 Windows 上用 bash 而不是 PowerShell 来处理文本、文件和搜索任务。
 
 [English](README-en.md)
 
@@ -16,7 +16,7 @@ AI 编程助手在 Windows 上默认用 PowerShell。即使是最强的模型，
 - 需要统计行数 → 写了 `Get-Content | Measure-Object -Line` 而不是 `wc -l`
 - 需要批量替换 → 写了 `ForEach-Object { $_ -replace }` 而不是 `sed`
 
-这些代码能跑，但更慢、更冗长、更容易出 bug。而且模型明明知道 bash 怎么写——只是没人告诉它在 Windows 上也应该用。
+这些代码能跑，但更冗长、更难读。模型知道 bash 怎么写——只是默认行为倾向 PowerShell。
 
 ## 怎么安装
 
@@ -42,7 +42,7 @@ Install the /win-to-unix skill from https://github.com/redtidev1918/win-to-unix 
 
 ## 它修复了哪些反模式
 
-win-to-unix 检查 18 种 PowerShell 反模式，包括：
+AGENTS.md 告诉 agent 用 bash 替代这 18 种 PowerShell 写法：
 
 1. **`Select-String`** → 应该用 `grep`
 2. **`Get-ChildItem -Recurse -Filter`** → 应该用 `find`
@@ -63,7 +63,7 @@ win-to-unix 检查 18 种 PowerShell 反模式，包括：
 17. **`ForEach-Object { $_.Name }`** → 应该用 `basename`
 18. **`ConvertTo-Json`** → 应该用 `jq`
 
-它还教 agent 基本规则：bash 是默认 shell，PowerShell 只用于 Windows 注册表、服务、.NET 对象和 UE 构建工具。
+AGENTS.md 还包含一条基本规则：bash 是默认 shell，PowerShell 只用于 Windows 注册表、服务、.NET 对象和 UE 构建工具。
 
 ## 仓库结构
 
@@ -75,3 +75,4 @@ win-to-unix 检查 18 种 PowerShell 反模式，包括：
 ## 许可证
 
 MIT
+

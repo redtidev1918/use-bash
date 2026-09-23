@@ -4,7 +4,7 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078D4.svg?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 [![For](https://img.shields.io/badge/For-Codex%20%2B%20AI%20Agents-8A2BE2.svg)](https://github.com/openai/codex)
 
-Fix 18 anti-patterns that make AI coding agents get stuck on PowerShell instead of using bash on Windows.
+Tell AI coding agents to use bash instead of PowerShell for text processing, file operations, and code search on Windows.
 
 [中文](README.md)
 
@@ -16,7 +16,7 @@ AI coding agents default to PowerShell on Windows. Even the best models keep pro
 - To count lines → `Get-Content | Measure-Object -Line` instead of `wc -l`
 - To batch replace → `ForEach-Object { $_ -replace }` instead of `sed`
 
-This code works, but it is slower, more verbose, and more fragile. The model already knows how to write bash — nobody told it that it should on Windows too.
+This code works, but it is more verbose and harder to read. The model already knows bash — it just defaults to PowerShell on Windows.
 
 ## How to install
 
@@ -42,7 +42,7 @@ After (agent uses bash automatically):
 
 ## The anti-patterns it fixes
 
-win-to-unix checks for 18 PowerShell anti-patterns, including:
+AGENTS.md tells the agent to replace these 18 PowerShell patterns with bash:
 
 1. **`Select-String`** → use `grep`
 2. **`Get-ChildItem -Recurse -Filter`** → use `find`
@@ -75,3 +75,4 @@ It also teaches the agent the base rule: bash is the default shell, PowerShell i
 ## License
 
 MIT
+
