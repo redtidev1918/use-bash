@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    Codex Win Unix - One-click Unix-like dev shell for Windows + AI agents.
+    winix - One-click Unix-like dev shell for Windows + AI agents.
 .EXAMPLE
     .\setup.ps1                                    # Default (proxy 7897)
     .\setup.ps1 -ProxyUrl "http://127.0.0.1:1080"  # Custom proxy
@@ -25,7 +25,7 @@ function Write-Step($msg) { $script:Step++; Write-Host "`n[$($script:Step)/$($sc
 function Write-Ok($msg)   { Write-Host "  [OK] $msg" -ForegroundColor Green }
 function Write-Skip($msg) { Write-Host "  [--] $msg" -ForegroundColor DarkGray }
 
-Write-Host "=== Codex Win Unix Setup ===" -ForegroundColor Magenta
+Write-Host "=== winix Setup ===" -ForegroundColor Magenta
 
 # 1. Scoop
 Write-Step "Package Manager (Scoop)"
@@ -142,7 +142,7 @@ if (-not $SkipAgents) {
         New-Item -ItemType Directory -Force -Path (Split-Path $agentsPath) | Out-Null
         if (Test-Path $agentsPath) {
             $existing = Get-Content $agentsPath -Raw
-            if ($existing -notmatch 'codex-win-unix') { Add-Content $agentsPath $agentsContent -Encoding UTF8; Write-Ok "AGENTS.md appended" }
+            if ($existing -notmatch 'winix') { Add-Content $agentsPath $agentsContent -Encoding UTF8; Write-Ok "AGENTS.md appended" }
             else { Write-Skip "AGENTS.md" }
         } else { Set-Content $agentsPath $agentsContent -Encoding UTF8; Write-Ok "AGENTS.md created" }
     }
@@ -158,3 +158,4 @@ if (Test-Path $msysBin) {
 
 Write-Host "`n=== Setup complete! Restart terminal. ===" -ForegroundColor Green
 Write-Host "  ls/ll/lt=eza | z=jump | proxy-on/off | bash=MSYS2" -ForegroundColor Cyan
+

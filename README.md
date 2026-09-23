@@ -1,24 +1,18 @@
 # winix
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Windows terminal that runs Unix tools natively. One script installs Scoop, MSYS2 bash, Starship, and a PowerShell profile so `grep`, `sed`, `awk`, and `make` work without WSL or a VM.
 
-Built for developers who use AI coding agents (Codex, Claude, Cursor) and are tired of `Get-ChildItem -Recurse | Select-String` when they mean `grep -rn`.
+## How to install winix
 
-## Two ways to use
+The easiest way is to paste this into Codex, Claude Code, Cursor, or your favorite coding agent:
 
-**As a Codex skill** (recommended if you use Codex):
-
-```powershell
-# Copy the skill into Codex
-cp -r skill/ ~/.codex/skills/winix/
-
-# Then just tell Codex:
-# "帮我设置 Unix shell 环境" or "set up a better terminal"
+```
+Install the /winix skill from https://github.com/redtidev1918/winix and run the setup
 ```
 
-Codex reads the skill, runs setup, and writes `~/.codex/AGENTS.md`. From then on, every Codex session knows when to use bash vs PowerShell — you never think about it again.
-
-**As a standalone script** (no Codex needed):
+Or install it yourself:
 
 ```powershell
 git clone https://github.com/redtidev1918/winix.git
@@ -26,9 +20,29 @@ cd winix
 .\setup.ps1
 ```
 
-## What the agent gets
+Requires PowerShell 7. Restart your terminal after setup.
 
-After setup, `~/.codex/AGENTS.md` tells your AI agent:
+## How to use winix
+
+### Daily commands you get
+
+```powershell
+ls                              # eza with icons, colored
+ll                              # eza with details, git status, permissions
+lt                              # eza tree view
+z gun                           # zoxide jumps to any dir matching "gun"
+grep -rn "UCLASS" src/          # real grep, not PowerShell Select-String
+sed 's/old/new/g' file.txt     # real sed
+awk '{print $2}' data.csv      # real awk
+make                            # real make
+proxy-on / proxy-off           # toggle proxy (default 127.0.0.1:7897)
+which git                       # find command path
+bash                            # enter MSYS2 bash
+```
+
+### What your AI agent gets
+
+After setup, winix writes `~/.codex/AGENTS.md`. From then on, every Codex session knows:
 
 | Task | Shell |
 |------|-------|
@@ -36,21 +50,20 @@ After setup, `~/.codex/AGENTS.md` tells your AI agent:
 | Unix pipelines (`grep \| sed \| awk`) | MSYS2 bash |
 | Full Linux (apt, gcc, docker) | WSL |
 
-In `exec_command`, the agent passes `shell: "bash"` to use MSYS2 bash. In PowerShell, `bash -c "cmd"` calls MSYS2 bash. The agent picks the right one automatically.
+So when you ask Codex "count the lines in all .cpp files", it runs `find ... \| wc -l` in bash instead of `Get-ChildItem ... \| Measure-Object -Line` in PowerShell. You don't configure anything.
 
-## Before and after
+### Setup options
 
-Finding all `UCLASS` declarations in a UE project:
-
-```bash
-# Without winix (PowerShell)
-Get-ChildItem -Recurse -Filter "*.h" | Select-String -Pattern "UCLASS" | Group-Object Path | Sort-Object Count -Descending
-
-# With winix (agent uses bash automatically)
-grep -rn "UCLASS" Source/ --include="*.h" | cut -d: -f1 | sort | uniq -c | sort -rn
+```powershell
+.\setup.ps1                                    # Default (proxy 127.0.0.1:7897)
+.\setup.ps1 -ProxyUrl "http://127.0.0.1:1080"  # Custom proxy
+.\setup.ps1 -ProxyUrl "none"                   # No proxy
+.\setup.ps1 -SkipFont                          # Skip Nerd Font
+.\setup.ps1 -SkipMsys2                         # Skip MSYS2
+.\setup.ps1 -SkipMirrors                       # Skip China mirrors (npm/pip)
 ```
 
-## What gets installed
+## What it installs
 
 | Category | What |
 |----------|------|
@@ -59,48 +72,17 @@ grep -rn "UCLASS" Source/ --include="*.h" | cut -d: -f1 | sort | uniq -c | sort 
 | Terminal UX | [Starship](https://starship.rs), [zoxide](https://github.com/ajeetdsouza/zoxide), [eza](https://github.com/eza-community/eza), ripgrep, fd, fzf, bat |
 | Unix bridge | [MSYS2](https://www.msys2.org) — bash, grep, sed, awk, find, make, patch, diff, tar, vim |
 | Font | JetBrainsMono Nerd Font |
-
-## Setup options
-
-```powershell
-.\setup.ps1                                    # Default (proxy 127.0.0.1:7897)
-.\setup.ps1 -ProxyUrl "http://127.0.0.1:1080"  # Custom proxy
-.\setup.ps1 -ProxyUrl "none"                   # No proxy
-.\setup.ps1 -SkipFont                          # Skip Nerd Font
-.\setup.ps1 -SkipMsys2                         # Skip MSYS2
-.\setup.ps1 -SkipMirrors                       # Skip China mirrors
-```
-
-Restart your terminal after setup.
-
-## What you get
-
-```
-PS D:\project> ll                              # eza with icons and git status
-PS D:\project> grep -rn "TODO" src/ | wc -l    # MSYS2 grep works from PowerShell
-PS D:\project> z gun                           # zoxide jumps to GunSurvivors
-PS D:\project> proxy-off                       # turn off proxy
-PS D:\project> bash                            # enter MSYS2 bash
-bash> make clean && make                       # full Unix toolchain
-```
+| AI awareness | `~/.codex/AGENTS.md` |
 
 ## For China
 
-The script configures these by default:
-
-- npm → `registry.npmmirror.com`
-- pip → `mirrors.aliyun.com/pypi/simple/`
-- Git proxy → your proxy address
-- UTF-8 everywhere (fixes GBK garbled text and emoji)
-
-Use `-SkipMirrors` if you don't need this.
+Configured by default: npm → npmmirror.com, pip → aliyun mirror, Git proxy, UTF-8 (fixes GBK garbled text). Use `-SkipMirrors` to skip.
 
 ## Uninstall
 
 ```powershell
 scoop uninstall git nodejs python starship zoxide eza ripgrep fd fzf bat jq 7zip msys2 JetBrainsMono-NF
 Remove-Item ~\.config\starship.toml
-# Restore your profile from the .bak file setup.ps1 created
 ```
 
 ## License
