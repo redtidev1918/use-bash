@@ -30,6 +30,24 @@ if (-not $gitBash) {
 
 If no bash found: `scoop install git` or `winget install Git.Git`
 
+## Step 1.5: Fix PATH (WSL bash conflict)
+
+```powershell
+$windowsApps = "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps"
+$bashDir = Split-Path $gitBash
+$userPath = [Environment]::GetEnvironmentVariable('Path','User')
+$pathParts = $userPath -split ';' | Where-Object { $_ }
+$bashIdx = [array]::IndexOf($pathParts, $bashDir)
+$waIdx = [array]::IndexOf($pathParts, $windowsApps)
+if ($bashIdx -ge 0 -and $waIdx -ge 0 -and $bashIdx -gt $waIdx) {
+    $pathParts = @($pathParts[$bashIdx]) + @($pathParts | Where-Object { $_ -ne $bashDir })
+    [Environment]::SetEnvironmentVariable('Path', ($pathParts -join ';'), 'User')
+    Write-Host "PATH fixed: restart terminal"
+}
+```
+
+This prevents `bash` from resolving to WSL's `bash.exe` (slow, hangs).
+
 ## Step 2: Write AGENTS.md
 
 This is the most important step. Write `~/.codex/AGENTS.md` (create directory if needed). Use the template from `config/AGENTS.md.template`, replacing `{{BASH_PATH}}` with the bash path found in Step 1.
@@ -69,5 +87,6 @@ Test-Path "$env:USERPROFILE\.codex\AGENTS.md"
 Done. Your agent will now use bash (grep/sed/awk/find) for Unix tasks
 and PowerShell for Windows tasks. Restart terminal for AGENTS.md to take effect.
 ```
+
 
 
