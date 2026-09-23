@@ -1,30 +1,15 @@
-# 下载 use-bash
+<!-- docsite-release-repo: redtidev1918/use-bash -->
+<!-- docsite-release-tag: v1.0.0 -->
+# 📥 下载 use-bash
 
 **语言 / Language:** 中文 · [English](/en/download.md)
 
-本页汇总最新安装包与获取方式。完整资产与历史版本见 [Releases](https://github.com/redtidev1918/use-bash/releases)。
+<!-- docsite: generated from redtidev1918/use-bash release v1.0.0; do not edit by hand -->
 
-## 发布产物
+本页由 GitHub Actions 在每次发版时**自动更新**，始终指向最新 Release。
 
-| 平台 | 包 | 说明 |
-| :-- | :-- | :-- |
-| Windows | `use-bash-<version>-windows-x64.zip` | 解压即用 |
-| macOS | `use-bash-<version>-macos-arm64.tar.gz` | 首次运行需在「隐私与安全性」中放行 |
-| Linux | `use-bash-<version>-linux-x64.tar.gz` | 解压后 `chmod +x` |
+## 最新版本：`v1.0.0`（2026-09-23）
 
-校验文件：`SHA256SUMS`。
+👉 [查看 Release 说明与校验和](https://github.com/redtidev1918/use-bash/releases/tag/v1.0.0)
 
-## 校验下载
-
-```bash
-sha256sum -c SHA256SUMS
-```
-
-## 其他获取方式
-
-- npm：`npm install use-bash`
-- 源码：`git clone https://github.com/redtidev1918/use-bash.git`
-
-## 更新日志
-
-见 [CHANGELOG](https://github.com/redtidev1918/use-bash/blob/main/CHANGELOG.md)。
+> 本仓库没有附带二进制资产；安装方式见文档。

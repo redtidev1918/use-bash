@@ -1,30 +1,15 @@
-# Download use-bash
+<!-- docsite-release-repo: redtidev1918/use-bash -->
+<!-- docsite-release-tag: v1.0.0 -->
+# 📥 Download use-bash
 
 **Language / 语言:** [中文](/download.md) · English
 
-This page lists the latest packages and how to get them. See [Releases](https://github.com/redtidev1918/use-bash/releases) for all assets and older versions.
+<!-- docsite: generated from redtidev1918/use-bash release v1.0.0; do not edit by hand -->
 
-## Release assets
+This page is **generated automatically** by GitHub Actions on every release and always points at the latest one.
 
-| Platform | Package | Notes |
-| :-- | :-- | :-- |
-| Windows | `use-bash-<version>-windows-x64.zip` | Unzip and run |
-| macOS | `use-bash-<version>-macos-arm64.tar.gz` | Allow it under Privacy & Security on first launch |
-| Linux | `use-bash-<version>-linux-x64.tar.gz` | `chmod +x` after extracting |
+## Latest version: `v1.0.0` (2026-09-23)
 
-Checksums: `SHA256SUMS`.
+👉 [Release notes and checksums](https://github.com/redtidev1918/use-bash/releases/tag/v1.0.0)
 
-## Verify the download
-
-```bash
-sha256sum -c SHA256SUMS
-```
-
-## Other ways to install
-
-- npm: `npm install use-bash`
-- From source: `git clone https://github.com/redtidev1918/use-bash.git`
-
-## Changelog
-
-See [CHANGELOG](https://github.com/redtidev1918/use-bash/blob/main/CHANGELOG.md).
+> This repository ships no binary assets; see the docs for installation.
