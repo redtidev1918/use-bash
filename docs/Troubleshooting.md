@@ -1,3 +1,7 @@
+---
+title: 踩坑记录 / Troubleshooting
+---
+
 # Troubleshooting / 踩坑记录
 
 Real-world issues found while installing and running `use-bash` on a Windows 11 machine (scoop MSYS2 + WSL Ubuntu-24.04 + Windows PowerShell 5.1 / PowerShell 7). English TL;DR at the bottom.
