@@ -69,3 +69,4 @@ Test-Path "$env:USERPROFILE\.codex\AGENTS.md"
 Done. Your agent will now use bash (grep/sed/awk/find) for Unix tasks
 and PowerShell for Windows tasks. Restart terminal for AGENTS.md to take effect.
 ```
+

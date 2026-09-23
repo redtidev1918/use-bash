@@ -1,39 +1,70 @@
-# Shell Selection Rules
+# Shell Rules
 
-## CRITICAL: Use the right shell
+## Default shell: bash. Always.
 
-| Task | Shell | How to invoke |
-|------|-------|---------------|
-| grep, sed, awk, find, xargs, make, patch, diff, tar, curl, sort, uniq, wc, head, tail | **bash** | `shell: "bash"` in exec_command |
-| Windows paths, .NET objects, registry, services, UE tooling | PowerShell 7 | Default |
-| apt, gcc, docker, full Linux | WSL | `wsl -d Ubuntu-24.04 -- cmd` |
+Use bash for everything. Only use PowerShell when bash literally cannot do the task (see exceptions below).
 
-## NEVER do this in PowerShell
+When you reach for `Select-String`, `Get-ChildItem -Filter`, or any PowerShell pipeline — stop. Use bash instead.
 
-- `Select-String` → use `grep`
-- `Get-ChildItem -Recurse -Filter` → use `find`
-- `ForEach-Object { $_ -replace }` → use `sed`
-- `Measure-Object -Line` → use `wc -l`
-- `Group-Object` → use `sort | uniq -c`
-- `Sort-Object` → use `sort`
-- `Where-Object` → use `grep -v` or `awk`
+## How to use bash
 
-## ALWAYS do this
+In exec_command, pass `shell: "bash"`. That's it.
 
-- For ANY pipeline with 2+ stages → use bash
-- For text processing, log analysis, file counting → use bash
-- For code search across files → use bash (`grep -rn`)
-- For Windows-specific operations (registry, services, processes) → PowerShell is fine
+If `shell: "bash"` is not available, use `bash -c "your command"` from PowerShell.
 
-## Bash tools available
+## Bash tools
 
-bash, grep, sed, awk, find, xargs, make, patch, diff, tar, gzip, bzip2, xz, curl, wget, ssh, scp, vim, nano, less, which, tree, sort, uniq, wc, head, tail, cut, tr, tee, date, sleep
+grep, sed, awk, find, xargs, make, patch, diff, tar, gzip, bzip2, xz, curl, wget, ssh, scp, vim, nano, less, which, tree, sort, uniq, wc, head, tail, cut, tr, tee, date, sleep
 
-## How to invoke bash
+## When to use PowerShell (rare)
 
-In exec_command: pass `shell: "bash"` to use bash directly.
-From PowerShell: `bash -c "command"` calls bash.
-For WSL: `wsl -d Ubuntu-24.04 -- command`
+Only for these:
+- Windows registry (`Get-ItemProperty`, `Set-ItemProperty`)
+- Windows services (`Get-Service`, `Start-Service`)
+- Windows processes (`Get-Process`, `Stop-Process`)
+- .NET objects (`[System.IO.File]`, etc.)
+- Windows Installer / MSI operations
+- UnrealBuildTool / UE build scripts that require PowerShell
+
+Everything else → bash.
+
+## Mapping: PowerShell → bash
+
+| Instead of | Use |
+|------------|-----|
+| `Select-String -Pattern "x"` | `grep "x"` |
+| `Get-ChildItem -Recurse -Filter "*.py"` | `find . -name "*.py"` |
+| `Get-ChildItem -Recurse \| Select-String "x"` | `grep -rn "x" .` |
+| `ForEach-Object { $_ -replace "a","b" }` | `sed 's/a/b/g'` |
+| `Measure-Object -Line` | `wc -l` |
+| `Group-Object` | `sort \| uniq -c` |
+| `Sort-Object -Descending` | `sort -r` |
+| `Where-Object { ... }` | `grep -v` or `awk` |
+| `Get-Content file \| Measure-Object` | `wc -l file` |
+| `Copy-Item -Recurse` | `cp -r` |
+| `Remove-Item -Recurse -Force` | `rm -rf` |
+| `New-Item -ItemType Directory` | `mkdir -p` |
+| `Get-Content` | `cat` or `less` |
+| `Set-Content` | `echo "..." > file` |
+| `Test-Path` | `test -f` or `test -d` |
+| `Join-Path` | `$dir/$file` |
+
+## Examples
+
+Counting lines of code:
+```bash
+find src/ \( -name "*.py" -o -name "*.js" \) -exec cat {} + | wc -l
+```
+
+Searching for a pattern:
+```bash
+grep -rn "TODO" src/ --include="*.py"
+```
+
+Replacing text in files:
+```bash
+find src/ -name "*.py" -exec sed -i 's/old_func/new_func/g' {} +
+```
 
 ## Encoding
 
