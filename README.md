@@ -1,4 +1,4 @@
-# win-to-unix
+# bash-first
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078D4.svg?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
@@ -23,7 +23,7 @@ AI 编程助手在 Windows 上默认用 PowerShell。即使是最强的模型，
 把这句话贴进 Codex、Claude Code、Cursor 或你的编程助手：
 
 ```text
-Install the /win-to-unix skill from https://github.com/redtidev1918/win-to-unix and run the setup
+Install the /bash-first skill from https://github.com/redtidev1918/bash-first and run the setup
 ```
 
 ## 怎么用
@@ -75,4 +75,5 @@ AGENTS.md 还包含一条基本规则：bash 是默认 shell，PowerShell 只用
 ## 许可证
 
 MIT
+
 
