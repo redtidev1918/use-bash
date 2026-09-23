@@ -11,8 +11,8 @@ When you reach for `Select-String`, `Get-ChildItem -Filter`, or any PowerShell p
 
 Your bash binary: `{{BASH_PATH}}`
 
-If `shell: "bash"` hangs or resolves to WSL, use the full path above instead:
-`& "{{BASH_PATH}}" -c "your command"`
+If `shell: "bash"` hangs or resolves to WSL, use the full path above instead. When calling bash from PowerShell, prepend PATH setup:
+`& "{{BASH_PATH}}" -c "export PATH=/usr/bin:/bin; your command"`
 
 ## How to use bash
 
@@ -77,5 +77,7 @@ find src/ -name "*.py" -exec sed -i 's/old_func/new_func/g' {} +
 ## Encoding
 
 UTF-8 everywhere. Never use GBK.
+
+
 
 
