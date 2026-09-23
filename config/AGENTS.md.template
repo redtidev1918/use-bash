@@ -11,7 +11,7 @@ When you reach for `Select-String`, `Get-ChildItem -Filter`, or any PowerShell p
 
 Your bash binary: `{{BASH_PATH}}`
 
-If `shell: "bash"` hangs, it resolved to `C:\Windows\System32\bash.exe` (WSL), which hangs when its stdio is piped. Retry with the full path above.
+If `shell: "bash"` hangs, it resolved to the WSL bash alias (now renamed to bash-wsl.exe on this machine). Retry with the full path above.
 Prefer a login shell so /usr/bin is on PATH: `& "{{BASH_PATH}}" -lc "your command"`
 (or prepend `export PATH=/usr/bin:/bin;` for non-login shells).
 
@@ -82,3 +82,14 @@ UTF-8 everywhere. Never use GBK.
 
 
 
+
+
+## WSL rescue - run this FIRST when wsl.exe commands hang
+
+Stale wsl.exe processes deadlock WslService; every new wsl.exe then hangs.
+
+1. Stop-Process -Name wsl,wslhost -Force
+2. Retry the wsl command. Do NOT reboot, do NOT uninstall WSL, do NOT unregister distros.
+3. If the service itself is wedged: Restart-Service WslService -Force - needs admin.
+
+Never kill vmmem or vmcompute to fix a WSL hang.

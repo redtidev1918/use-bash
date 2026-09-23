@@ -1,9 +1,31 @@
 #Requires -Version 5.1
-param([string]$ProxyUrl = "auto", [switch]$SkipDefender)
+param([string]$ProxyUrl = "auto", [switch]$SkipDefender, [switch]$KeepWslBashAlias)
 $ErrorActionPreference = "Stop"
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 Write-Host "=== use-bash setup ===" -ForegroundColor Cyan
-Write-Host "[1/6] Finding bash..."
+Write-Host "[0/7] Backing up current state..."
+$backupPath = "$env:USERPROFILE\.codex\use-bash-backup.json"
+if (Test-Path $backupPath) {
+  Write-Host "  Backup already exists, keeping it: $backupPath" -ForegroundColor Yellow
+} else {
+  $agentsDir = "$env:USERPROFILE\.codex"; New-Item -ItemType Directory -Force -Path $agentsDir | Out-Null
+  $agentsExists = Test-Path "$agentsDir\AGENTS.md"
+  $state = [ordered]@{
+    timestamp      = (Get-Date).ToString("o")
+    userPath       = [Environment]::GetEnvironmentVariable("Path","User")
+    agentsMdExists = $agentsExists
+    bashAliasState = if (Test-Path "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\bash.exe") { "present" } else { "absent" }
+    gitConfig      = @{}
+  }
+  foreach ($k in @("core.autocrlf","core.longpaths","core.fscache","core.preloadindex","core.untrackedCache","core.fsmonitor","gc.auto")) {
+    $v = git config --global --get $k 2>$null
+    if ($v) { $state.gitConfig[$k] = $v }
+  }
+  if ($agentsExists) { Copy-Item "$agentsDir\AGENTS.md" "$agentsDir\AGENTS.md.use-bash-bak" -Force }
+  $state | ConvertTo-Json -Depth 3 | Set-Content $backupPath -Encoding UTF8
+  Write-Host "  Backup saved: $backupPath" -ForegroundColor Green
+}
+Write-Host "[1/7] Finding bash..."
 $bashPath = $null; $bashSource = ""; $bashDir = $null
 foreach ($c in @(
   @{ p = "$env:USERPROFILE\scoop\apps\msys2\current\usr\bin\bash.exe"; t = "MSYS2"; d = "$env:USERPROFILE\scoop\apps\msys2\current\usr\bin" },
@@ -13,7 +35,7 @@ foreach ($c in @(
 $pathBash = (Get-Command bash -ErrorAction SilentlyContinue).Source
 if (-not $bashPath -and $pathBash -and $pathBash -notmatch "WindowsApps") { $bashPath = $pathBash; $bashSource = "PATH"; $bashDir = Split-Path $pathBash }
 if (-not $bashPath) { Write-Host "  No bash found. Install Git for Windows manually." -ForegroundColor Red; exit 1 }
-Write-Host "[2/6] Fixing PATH order..."
+Write-Host "[2/7] Fixing PATH order..."
 $windowsApps = "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps"
 if ($bashDir -and (Test-Path $windowsApps)) {
   $userPath = [Environment]::GetEnvironmentVariable("Path","User")
@@ -27,10 +49,23 @@ if ($bashDir -and (Test-Path $windowsApps)) {
   else { Write-Host "  PATH order OK" }
 }
 Write-Host "  Bash: $bashPath ($bashSource)" -ForegroundColor Green
-Write-Host "[3/6] Detecting proxy..."
+Write-Host "[3/7] Renaming WSL bash alias..."
+$wslAlias = "$windowsApps\bash.exe"
+if ($KeepWslBashAlias) {
+  Write-Host "  Skipped (-KeepWslBashAlias)" -ForegroundColor Yellow
+} elseif (Test-Path $wslAlias) {
+  try {
+    Rename-Item $wslAlias "bash-wsl.exe" -ErrorAction Stop
+    Write-Host "  Renamed bash.exe to bash-wsl.exe: bare bash can no longer hit WSL" -ForegroundColor Green
+    Write-Host "  WSL stays fully usable via the wsl command. Undo: rename bash-wsl.exe back to bash.exe" -ForegroundColor DarkGray
+  } catch { Write-Host "  Could not rename alias: $_" -ForegroundColor Yellow }
+} else {
+  Write-Host "  No bash.exe alias found (already renamed or removed)"
+}
+Write-Host "[4/7] Detecting proxy..."
 if ($ProxyUrl -eq "auto") { $ProxyUrl = "none"; foreach ($port in @(7897,7890,1080,10808)) { try { $null = Invoke-WebRequest -Uri "https://www.google.com" -Proxy "http://127.0.0.1:$port" -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop; $ProxyUrl = "http://127.0.0.1:$port"; break } catch {} } }
 Write-Host "  Proxy: $ProxyUrl"
-Write-Host "[4/6] Writing AGENTS.md..."
+Write-Host "[5/7] Writing AGENTS.md..."
 $agentsDir = "$env:USERPROFILE\.codex"; New-Item -ItemType Directory -Force -Path $agentsDir | Out-Null
 $agentsPath = "$agentsDir\AGENTS.md"
 $templatePath = Join-Path $scriptDir "config\AGENTS.md.template"
@@ -54,7 +89,7 @@ if (Test-Path $templatePath) {
     Write-Host "  AGENTS.md created"
   }
 }
-Write-Host "[5/6] Configuring Git..."
+Write-Host "[6/7] Configuring Git..."
 git config --global core.autocrlf false 2>$null
 git config --global core.longpaths true 2>$null
 git config --global core.fscache true 2>$null
@@ -64,11 +99,11 @@ git config --global core.fsmonitor true 2>$null
 git config --global gc.auto 0 2>$null
 if ($ProxyUrl -ne "none") { git config --global http.proxy $ProxyUrl 2>$null; git config --global https.proxy $ProxyUrl 2>$null }
 Write-Host "  Git configured"
-Write-Host "[6/6] System optimizations..."
+Write-Host "[7/7] System optimizations..."
 if (-not $SkipDefender) { $adminScript = Join-Path $scriptDir "config\optimize-admin.ps1"; if (Test-Path $adminScript) { try { Start-Process powershell -Verb RunAs -ArgumentList "-ExecutionPolicy","Bypass","-File",$adminScript,"-BashDir",$bashDir -Wait -ErrorAction Stop; Write-Host "  Applied" } catch { Write-Host "  Skipped (need admin)" -ForegroundColor Yellow } } }
 $bashWorks = $false; try { $bashWorks = (& $bashPath -lc "grep --version" 2>$null) -ne $null } catch {}
 $agentsExists = Test-Path $agentsPath
 Write-Host ""; Write-Host "=== Result ==="
 if ($bashWorks) { Write-Host "  Bash: OK ($bashSource)" -ForegroundColor Green } else { Write-Host "  Bash: FAIL" -ForegroundColor Red }
 if ($agentsExists) { Write-Host "  AGENTS.md: OK" -ForegroundColor Green } else { Write-Host "  AGENTS.md: FAIL" -ForegroundColor Red }
-if ($bashWorks -and $agentsExists) { Write-Host "Done. Restart terminal." -ForegroundColor Green } else { Write-Host "Some checks failed." -ForegroundColor Yellow }
+if ($bashWorks -and $agentsExists) { Write-Host "Done. Restart terminal. To fully uninstall later, run uninstall.ps1 from this repo." -ForegroundColor Green } else { Write-Host "Some checks failed." -ForegroundColor Yellow }

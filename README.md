@@ -65,15 +65,38 @@ AGENTS.md 告诉 agent 用 bash 替代这 18 种 PowerShell 写法：
 
 AGENTS.md 还包含一条基本规则：bash 是默认 shell，PowerShell 只用于 Windows 注册表、服务、.NET 对象和 UE 构建工具。
 
+## 怎么卸载（彻底恢复原始状态）
+
+setup 修改任何配置之前都会先把原始状态备份到 `~/.codex/use-bash-backup.json`。卸载时按备份精确还原：
+
+把这句话贴进你的编程助手：
+
+```text
+Uninstall the /use-bash skill completely and restore the original state:
+run the Uninstall section (U1-U8) of ~/.codex/skills/use-bash/SKILL.md,
+restoring everything from use-bash-backup.json.
+```
+
+或者直接在仓库目录运行：
+
+```powershell
+.\uninstall.ps1
+```
+
+会依次还原：AGENTS.md（还原或删除）、WSL bash 别名、用户 PATH、7 项 git 配置、Defender 排除项，最后删除 skill 本体。详见 uninstall.ps1 和 skill/SKILL.md 的 Uninstall 章节。
+
+注意：卸载后重启终端或 agent 应用——运行中的进程持有旧的 PATH 快照。
 ## 仓库结构
 
 - [`skill/SKILL.md`](skill/SKILL.md) — agent 安装手册（检测环境 → 找 bash → 写 AGENTS.md → 验证）
 - [`config/AGENTS.md.template`](config/AGENTS.md.template) — agent 行为规则（核心交付物）
 - [`config/optimize-admin.ps1`](config/optimize-admin.ps1) — Defender 排除 + NTFS 优化（可选）
-- [`setup.ps1`](setup.ps1) — 一键安装脚本
+- [`setup.ps1`](setup.ps1) — 一键安装脚本（先备份原状态）
+- [`uninstall.ps1`](uninstall.ps1) — 一键彻底卸载并还原原始状态
 
 ## 许可证
 
 MIT
+
 
 

@@ -65,15 +65,43 @@ AGENTS.md tells the agent to replace these 18 PowerShell patterns with bash:
 
 It also teaches the agent the base rule: bash is the default shell, PowerShell is only for Windows registry, services, .NET objects, and UE build tools.
 
+## Uninstall (full restore)
+
+Setup backs up the original state to `~/.codex/use-bash-backup.json` before
+touching anything, so uninstall restores everything exactly.
+
+Paste this into your coding agent:
+
+```text
+Uninstall the /use-bash skill completely and restore the original state:
+run the Uninstall section (U1-U8) of ~/.codex/skills/use-bash/SKILL.md,
+restoring everything from use-bash-backup.json.
+```
+
+Or run the script from a clone of this repo:
+
+```powershell
+.\uninstall.ps1
+```
+
+It restores AGENTS.md (original file, or deleted if setup created it), the WSL
+bash alias, the user PATH, the 7 git config keys, and the Defender exclusions,
+then removes the skill itself. See uninstall.ps1 and the Uninstall section of
+skill/SKILL.md for details.
+
+Note: restart your terminal or agent app afterwards - running processes keep a
+stale PATH snapshot.
 ## What's inside
 
 - [`skill/SKILL.md`](skill/SKILL.md) — agent setup instructions (detect → find bash → write AGENTS.md → verify)
 - [`config/AGENTS.md.template`](config/AGENTS.md.template) — agent behavior rules (the core deliverable)
 - [`config/optimize-admin.ps1`](config/optimize-admin.ps1) — Defender exclusions + NTFS optimization (optional)
-- [`setup.ps1`](setup.ps1) — one-click setup script
+- [`setup.ps1`](setup.ps1) — one-click setup script (backs up original state first)
+- [`uninstall.ps1`](uninstall.ps1) — one-click full uninstall and restore
 
 ## License
 
 MIT
+
 
 

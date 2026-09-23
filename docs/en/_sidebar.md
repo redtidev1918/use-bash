@@ -1,6 +1,7 @@
 - Start
   - [Overview](/en/)
   - [Quick Start](/en/QUICKSTART.md)
+  - [Uninstall](/en/Uninstall.md)
   - [📥 Download](/en/download.md)
   - [踩坑记录（中文文档）](/Troubleshooting.md)
 - 中文
