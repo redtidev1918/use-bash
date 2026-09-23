@@ -1,5 +1,5 @@
 ---
-name: bash-first
+name: use-bash
 description: >
   Make your AI agent use Unix shell (bash) instead of getting stuck on PowerShell.
   Writes AGENTS.md with shell selection rules so grep/sed/awk/find work naturally
@@ -8,7 +8,7 @@ description: >
   tasks that should use bash.
 ---
 
-# bash-first
+# use-bash
 
 Make the agent use bash on Windows. Follow these steps.
 

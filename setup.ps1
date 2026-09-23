@@ -3,7 +3,7 @@ param([string]$ProxyUrl = "auto", [switch]$SkipDefender)
 $ErrorActionPreference = "Stop"
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 
-Write-Host "=== bash-first setup ===" -ForegroundColor Cyan
+Write-Host "=== use-bash setup ===" -ForegroundColor Cyan
 
 # [1/5] Find or install bash
 Write-Host "\n[1/5] Finding bash..."

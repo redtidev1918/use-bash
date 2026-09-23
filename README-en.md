@@ -1,4 +1,4 @@
-# bash-first
+# use-bash
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078D4.svg?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
@@ -23,7 +23,7 @@ This code works, but it is more verbose and harder to read. The model already kn
 Paste this into Codex, Claude Code, Cursor, or your favorite coding agent:
 
 ```text
-Install the /bash-first skill from https://github.com/redtidev1918/bash-first and run the setup
+Install the /use-bash skill from https://github.com/redtidev1918/use-bash and run the setup
 ```
 
 ## How to use

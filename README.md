@@ -1,4 +1,4 @@
-# bash-first
+# use-bash
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078D4.svg?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
@@ -23,7 +23,7 @@ AI 编程助手在 Windows 上默认用 PowerShell。即使是最强的模型，
 把这句话贴进 Codex、Claude Code、Cursor 或你的编程助手：
 
 ```text
-Install the /bash-first skill from https://github.com/redtidev1918/bash-first and run the setup
+Install the /use-bash skill from https://github.com/redtidev1918/use-bash and run the setup
 ```
 
 ## 怎么用
