@@ -1,0 +1,8 @@
+- 开始
+  - [概览](/)
+  - [快速开始](/QUICKSTART.md)
+  - [📥 下载](/download.md)
+- 文档
+  - [踩坑记录 / Troubleshooting](/Troubleshooting.md)
+- English
+  - [English index](/en/)

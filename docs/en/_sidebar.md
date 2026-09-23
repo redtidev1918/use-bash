@@ -1,0 +1,7 @@
+- Start
+  - [Overview](/en/)
+  - [Quick Start](/en/QUICKSTART.md)
+  - [📥 Download](/en/download.md)
+  - [踩坑记录（中文文档）](/Troubleshooting.md)
+- 中文
+  - [中文首页](/)
