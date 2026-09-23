@@ -1,96 +1,71 @@
 ---
 name: win-to-unix
 description: >
-  Turn Windows into a Unix-capable dev environment for AI coding agents.
-  Installs Scoop, MSYS2 bash, Starship, dev tools. Optimizes Defender, NTFS,
-  Git, and power settings for speed. Writes AGENTS.md so the agent uses
-  grep/sed/awk naturally. Use when a Windows user wants a better terminal,
-  Unix commands, faster file I/O, or has encoding issues (GBK, emoji).
+  Make your AI agent use Unix shell (bash) instead of getting stuck on PowerShell.
+  Writes AGENTS.md with shell selection rules so grep/sed/awk/find work naturally
+  in Codex, Claude, or any coding agent on Windows. Also optimizes Defender and
+  Git for speed. Use when a Windows user's agent keeps using PowerShell for
+  tasks that should use bash.
 ---
 
 # win-to-unix
 
-Turn a Windows machine into a Unix-capable dev environment. Follow these steps in order.
+Make the agent use bash on Windows. Follow these steps.
 
-## Step 1: Detect
+## Step 1: Check Git Bash
 
 ```powershell
-# Check what's already installed
-$hasPwsh = [bool](Get-Command pwsh -ErrorAction SilentlyContinue)
-$hasScoop = [bool](Get-Command scoop -ErrorAction SilentlyContinue)
-$hasStarship = [bool](Get-Command starship -ErrorAction SilentlyContinue)
-
-# Detect proxy (test common ports)
-$proxyPort = $null
-foreach ($port in @(7897, 7890, 1080, 10808)) {
-    try {
-        $null = Invoke-WebRequest -Uri 'https://www.google.com' -Proxy "http://127.0.0.1:$port" -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop
-        $proxyPort = $port; break
-    } catch { }
+$gitBash = Get-Command bash -ErrorAction SilentlyContinue
+if (-not $gitBash) {
+    # Try common locations
+    $paths = @(
+        "$env:USERPROFILE\scoop\apps\git\current\bin\bash.exe",
+        "$env:USERPROFILE\scoop\shims\bash.exe",
+        "C:\Program Files\Git\bin\bash.exe",
+        "D:\Git\bin\bash.exe"
+    )
+    foreach ($p in $paths) { if (Test-Path $p) { $gitBash = $p; break } }
 }
 ```
 
-Decisions:
-- No pwsh → `winget install Microsoft.PowerShell` first
-- No scoop → setup.ps1 handles it
-- Proxy found → pass port to setup.ps1
-- No proxy → pass `-ProxyUrl "none"`
-- Starship exists → ask user before overwriting profile
+If no bash found: `scoop install git` or `winget install Git.Git`
 
-## Step 2: Clone and run
+## Step 2: Write AGENTS.md
+
+This is the most important step. Write `~/.codex/AGENTS.md` (create directory if needed). Use the template from `config/AGENTS.md.template`, replacing `{{BASH_PATH}}` with the bash path found in Step 1.
+
+## Step 3: Git config
 
 ```powershell
-git clone https://github.com/redtidev1918/win-to-unix.git "$env:USERPROFILE\.win-to-unix"
-cd "$env:USERPROFILE\.win-to-unix"
-.\setup.ps1   # or .\setup.ps1 -ProxyUrl "http://127.0.0.1:$proxyPort" or -ProxyUrl "none"
+git config --global core.autocrlf false
+git config --global core.longpaths true
+git config --global core.fscache true
+git config --global core.preloadindex true
+git config --global core.untrackedCache true
+git config --global core.fsmonitor true
+git config --global gc.auto 0
 ```
 
-## Step 3: Handle errors
+## Step 4: Defender exclusions (optional, needs admin)
 
-| Problem | Fix |
-|---------|-----|
-| `scoop: command not found` | `$env:Path = [Environment]::GetEnvironmentVariable('Path','User') + ';' + [Environment]::GetEnvironmentVariable('Path','Machine')` |
-| `scoop install` silent fail | Run `scoop install <name>` individually to see error |
-| pacman 404 | Use `pacman -S` without `-y` |
-| Font missing after install | Restart Windows Terminal |
-| Script execution blocked | `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force` |
-| Admin prompt denied | Setup continues without Defender/NTFS/Power optimizations. Tell user to run `config\optimize-admin.ps1` manually as admin. |
-
-## Step 4: Verify
+If `config\optimize-admin.ps1` exists, run it elevated:
 
 ```powershell
-# All should resolve
-Get-Command git, node, python, starship, zoxide, eza, rg, fd, jq, bat, 7z
+Start-Process powershell -Verb RunAs -ArgumentList '-ExecutionPolicy','Bypass','-File','config\optimize-admin.ps1' -Wait
+```
 
-# Bash should work
-& "$env:USERPROFILE\scoop\apps\msys2\current\usr\bin\bash.exe" --login -c "grep --version | head -1"
+If user declines, skip — not critical.
 
-# AGENTS.md exists
+## Step 5: Verify
+
+```powershell
+& "{{BASH_PATH}}" -c "grep --version | head -1"
 Test-Path "$env:USERPROFILE\.codex\AGENTS.md"
 ```
 
-All pass → tell user to restart terminal. Any fail → troubleshoot before reporting success.
-
-## Step 5: Report to user
+## Step 6: Tell user
 
 ```
-Setup complete. Restart your terminal (close and reopen).
-
-Installed: Scoop + 12 dev tools + MSYS2 bash + Starship + Nerd Font
-Optimized: Defender exclusions + NTFS + Git performance + High Performance power plan
-Configured: UTF-8, proxy, npm/pip mirrors, AGENTS.md for AI shell selection
-
-Your agent now automatically uses bash for grep/sed/awk and PowerShell for Windows tasks.
+Done. Your agent will now use bash (grep/sed/awk/find) for Unix tasks
+and PowerShell for Windows tasks. Restart terminal for AGENTS.md to take effect.
 ```
-
-## Step 6: Future session rules
-
-After setup, AGENTS.md is written. Every new session must follow these rules:
-
-1. Use `shell: "bash"` in exec_command for: grep, sed, awk, find, xargs, make, patch, diff, tar, curl, vim
-2. Use default PowerShell 7 for: Windows paths, .NET objects, registry, services, UE tooling
-3. Use `wsl -d Ubuntu-24.04 -- cmd` for: apt, gcc, docker, full Linux
-4. NEVER use `Select-String` when `grep` is available
-5. NEVER use `Get-ChildItem -Filter` when `find` is available
-6. NEVER use `ForEach-Object { $_ -replace }` when `sed` is available
-7. For pipelines with 2+ stages, always use bash
