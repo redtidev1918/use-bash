@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    winix - One-click Unix-like dev shell for Windows + AI agents.
+    unix-on-windows - One-click Unix-like dev shell for Windows + AI agents.
 .EXAMPLE
     .\setup.ps1                                    # Default (proxy 7897)
     .\setup.ps1 -ProxyUrl "http://127.0.0.1:1080"  # Custom proxy
@@ -44,7 +44,7 @@ function Write-Step($msg) { $script:Step++; Write-Host "`n[$($script:Step)/$($sc
 function Write-Ok($msg)   { Write-Host "  [OK] $msg" -ForegroundColor Green }
 function Write-Skip($msg) { Write-Host "  [--] $msg" -ForegroundColor DarkGray }
 
-Write-Host "=== winix Setup ===" -ForegroundColor Magenta
+Write-Host "=== unix-on-windows Setup ===" -ForegroundColor Magenta
 
 # 1. Scoop
 Write-Step "Package Manager (Scoop)"
@@ -161,7 +161,7 @@ if (-not $SkipAgents) {
         New-Item -ItemType Directory -Force -Path (Split-Path $agentsPath) | Out-Null
         if (Test-Path $agentsPath) {
             $existing = Get-Content $agentsPath -Raw
-            if ($existing -notmatch 'winix') { Add-Content $agentsPath $agentsContent -Encoding UTF8; Write-Ok "AGENTS.md appended" }
+            if ($existing -notmatch 'unix-on-windows') { Add-Content $agentsPath $agentsContent -Encoding UTF8; Write-Ok "AGENTS.md appended" }
             else { Write-Skip "AGENTS.md" }
         } else { Set-Content $agentsPath $agentsContent -Encoding UTF8; Write-Ok "AGENTS.md created" }
     }
@@ -175,7 +175,53 @@ if (Test-Path $msysBin) {
     } else { Write-Skip "MSYS2 PATH" }
 }
 
+# ============================================================
+# ============================================================
+# Performance Optimizations
+# ============================================================
+Write-Step "Performance (Defender + NTFS + Git + Power)"
+
+# Git performance config
+git config --global core.fscache true 2>$null
+git config --global core.preloadindex true 2>$null
+git config --global core.untrackedCache true 2>$null
+git config --global core.fsmonitor true 2>$null
+git config --global gc.auto 0 2>$null
+git config --global feature.manyFiles true 2>$null
+Write-Ok "Git performance config"
+
+# System-level optimizations (need admin)
+$adminScript = Join-Path $scriptDir "config\optimize-admin.ps1"
+if (Test-Path $adminScript) {
+    Start-Process powershell -Verb RunAs -ArgumentList '-ExecutionPolicy', 'Bypass', '-File', $adminScript -Wait
+    Write-Ok "Defender + NTFS + DevMode + PowerPlan"
+} else {
+    Write-Skip "admin script not found"
+}
+
+# WSL2 memory limits
+$wslPath = "$env:USERPROFILE\.wslconfig"
+if (Test-Path $wslPath) {
+    $wslContent = Get-Content $wslPath -Raw
+    if ($wslContent -notmatch 'memory=') {
+        $totalGB = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)
+        $wslMem = [math]::Max(4, [math]::Floor($totalGB / 2))
+        $wslCores = [math]::Max(2, [Environment]::ProcessorCount - 2)
+        Add-Content -Path $wslPath -Value "memory=${wslMem}GB"
+        Add-Content -Path $wslPath -Value "processors=$wslCores"
+        Add-Content -Path $wslPath -Value "swap=2GB"
+        Write-Ok "WSL2 memory: ${wslMem}GB"
+    } else {
+        Write-Skip "WSL2 memory already set"
+    }
+} else {
+    Set-Content -Path $wslPath -Value "[wsl2]`nmemory=8GB`nprocessors=6`nswap=2GB" -Encoding UTF8
+    Write-Ok "WSL2 config created"
+}
+
 Write-Host "`n=== Setup complete! Restart terminal. ===" -ForegroundColor Green
 Write-Host "  ls/ll/lt=eza | z=jump | proxy-on/off | bash=MSYS2" -ForegroundColor Cyan
+
+
 
 
