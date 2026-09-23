@@ -13,6 +13,7 @@ if (Test-Path $backupPath) {
   $state = [ordered]@{
     timestamp      = (Get-Date).ToString("o")
     userPath       = [Environment]::GetEnvironmentVariable("Path","User")
+    machinePath    = [Environment]::GetEnvironmentVariable("Path","Machine")
     agentsMdExists = $agentsExists
     bashAliasState = if (Test-Path "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\bash.exe") { "present" } else { "absent" }
     gitConfig      = @{}
@@ -107,3 +108,4 @@ Write-Host ""; Write-Host "=== Result ==="
 if ($bashWorks) { Write-Host "  Bash: OK ($bashSource)" -ForegroundColor Green } else { Write-Host "  Bash: FAIL" -ForegroundColor Red }
 if ($agentsExists) { Write-Host "  AGENTS.md: OK" -ForegroundColor Green } else { Write-Host "  AGENTS.md: FAIL" -ForegroundColor Red }
 if ($bashWorks -and $agentsExists) { Write-Host "Done. Restart terminal. To fully uninstall later, run uninstall.ps1 from this repo." -ForegroundColor Green } else { Write-Host "Some checks failed." -ForegroundColor Yellow }
+

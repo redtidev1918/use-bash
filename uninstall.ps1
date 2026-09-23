@@ -43,6 +43,23 @@ if ($state -and $state.userPath) {
 } else {
   Write-Host "  No backup: remove the bash dir manually if setup added one. Skipping auto-edit." -ForegroundColor Yellow
 }
+Write-Host "[3b/8] Restoring machine PATH..."
+$msysBin = "$env:USERPROFILE\scoop\apps\msys2\current\usr\bin"
+if ($state -and $state.machinePath) {
+  [Environment]::SetEnvironmentVariable("Path", $state.machinePath, "Machine")
+  Write-Host "  Machine PATH restored from backup" -ForegroundColor Green
+} else {
+  $mp = [Environment]::GetEnvironmentVariable("Path","Machine")
+  if ($mp) {
+    $mpParts = $mp -split ";" | Where-Object { $_ -and $_.TrimEnd("\") -ne $msysBin.TrimEnd("\") }
+    if ($mpParts.Count -ne ($mp -split ";").Count) {
+      [Environment]::SetEnvironmentVariable("Path", ($mpParts -join ";"), "Machine")
+      Write-Host "  Removed msys2 bash dir from Machine PATH" -ForegroundColor Green
+    } else {
+      Write-Host "  Machine PATH untouched"
+    }
+  }
+}
 Write-Host "[4/8] Restoring git config..."
 $keys = @("core.autocrlf","core.longpaths","core.fscache","core.preloadindex","core.untrackedCache","core.fsmonitor","gc.auto")
 foreach ($k in $keys) {
@@ -88,3 +105,4 @@ Write-Host "  Open a NEW terminal and run: where.exe bash"
 Write-Host "  Confirm the skill folder is gone and bash resolves the way you want."
 Write-Host ""
 Write-Host "Done. Restart your terminal or agent app - running processes keep a stale PATH snapshot." -ForegroundColor Green
+
