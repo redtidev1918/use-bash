@@ -1,15 +1,15 @@
 <!-- docsite-release-repo: redtidev1918/use-bash -->
-<!-- docsite-release-tag: v1.0.0 -->
+<!-- docsite-release-tag: v2.0.0 -->
 # 📥 Download use-bash
 
 **Language / 语言:** [中文](/download.md) · English
 
-<!-- docsite: generated from redtidev1918/use-bash release v1.0.0; do not edit by hand -->
+<!-- docsite: generated from redtidev1918/use-bash release v2.0.0; do not edit by hand -->
 
 This page is **generated automatically** by GitHub Actions on every release and always points at the latest one.
 
-## Latest version: `v1.0.0` (2026-09-23)
+## Latest version: `v2.0.0` (2026-09-23)
 
-👉 [Release notes and checksums](https://github.com/redtidev1918/use-bash/releases/tag/v1.0.0)
+👉 [Release notes and checksums](https://github.com/redtidev1918/use-bash/releases/tag/v2.0.0)
 
 > This repository ships no binary assets; see the docs for installation.
